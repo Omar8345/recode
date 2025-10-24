@@ -21,7 +21,7 @@ export function VerifyEmailContent() {
     if (!userId || !secret) {
       setStatus("error");
       setMessage(
-        "Missing verification details. Please use the link from your email."
+        "Missing verification details. Please use the link from your email.",
       );
       return;
     }
@@ -36,7 +36,7 @@ export function VerifyEmailContent() {
       } catch {
         setStatus("error");
         setMessage(
-          "Email verification failed. The link might be expired or already used."
+          "Email verification failed. The link might be expired or already used.",
         );
       }
     };
