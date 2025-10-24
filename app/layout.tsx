@@ -1,5 +1,5 @@
-import type React from "react";
 import type { Metadata } from "next";
+import type React from "react";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next";
@@ -8,11 +8,24 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "recode - Your personal snippet brain",
+  title: {
+    default: "recode",
+    template: "%s - Your personal snippet brain",
+  },
   description:
     "recode helps you save, search, and share your code snippets without friction.",
   icons: {
     icon: "/icon.svg",
+  },
+  openGraph: {
+    title: "recode - Your personal snippet brain",
+    description:
+      "recode helps you save, search, and share your code snippets without friction.",
+  },
+  twitter: {
+    title: "recode - Your personal snippet brain",
+    description:
+      "recode helps you save, search, and share your code snippets without friction.",
   },
 };
 
