@@ -225,31 +225,32 @@ export function DashboardPage({ user }: DashboardPageProps) {
             <AnimatePresence mode="wait">
               {filteredSnippets.length === 0 ? (
                 <motion.div
-                  key="loading"
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  key={snippets.length === 0 ? "empty" : "no-results"}
+                  initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
                   className="flex min-h-[400px] items-center justify-center rounded-lg border border-border bg-card"
                 >
-                  <div className="text-center text-muted-foreground">
-                    Fetching your snippets...
-                  </div>
-                </motion.div>
-              ) : filteredSnippets.length === 0 ? (
-                <motion.div
-                  key="empty"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="flex min-h-[400px] items-center justify-center rounded-lg border border-border bg-card"
-                >
-                  <div className="text-center">
+                  <div className="text-center space-y-2">
                     <p className="text-lg font-medium text-foreground">
-                      No snippets yet
+                      {snippets.length === 0
+                        ? "No snippets yet"
+                        : "No snippets match your filters"}
                     </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Click “Add snippet” to save your first code snippet.
+                    <p className="text-sm text-muted-foreground">
+                      {snippets.length === 0
+                        ? "Click “Add snippet” to save your first code snippet."
+                        : "Try adjusting or clearing your selected tags."}
                     </p>
+                    {snippets.length > 0 && selectedTags.length > 0 ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedTags([])}
+                      >
+                        Clear filters
+                      </Button>
+                    ) : null}
                   </div>
                 </motion.div>
               ) : (
