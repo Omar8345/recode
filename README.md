@@ -10,6 +10,12 @@
   <i>Save. Search. Share.</i><br><br>
 </p>
 
+<p align="center">
+  <a href="https://omarcodes.io/recode" target="_blank" rel="noopener noreferrer">
+    Read the launch story →
+  </a>
+</p>
+
 ---
 
 ## 🚀 Features
@@ -64,6 +70,6 @@ Pull requests are welcome! For major changes, open an issue first so we can alig
 
 <p align="center">
   <a href="https://appwrite.io/" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;">
-    <img src="public/appwrite.svg" alt="Appwrite" width="18" height="18" style="vertical-align:middle;"/> Powered by Appwrite
+    <img src="https://appwrite.io/assets/logomark/logo.svg" alt="Appwrite" width="18" height="18" style="vertical-align:middle;"/> Powered by Appwrite
   </a>
 </p>
