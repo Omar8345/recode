@@ -10,6 +10,12 @@
   <i>Save. Search. Share.</i><br><br>
 </p>
 
+<p align="center">
+  <a href="https://omarcodes.io/recode" target="_blank" rel="noopener noreferrer">
+    Read the launch story →
+  </a>
+</p>
+
 ---
 
 ## 🚀 Features
