@@ -32,7 +32,7 @@ interface EditSnippetModalProps {
   onOpenChange: (open: boolean) => void;
   onEdit: (
     id: string,
-    snippet: Omit<Snippet, "id" | "createdAt">
+    snippet: Omit<Snippet, "id" | "createdAt">,
   ) => Promise<void> | void;
   snippet: Snippet | null;
   isSubmitting?: boolean;
@@ -93,12 +93,12 @@ export function EditSnippetModal({
         .split(",")
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0),
-    [tags]
+    [tags],
   );
 
   const lineCount = useMemo(
     () => (code.trim().length > 0 ? code.trim().split(/\r?\n/).length : 0),
-    [code]
+    [code],
   );
 
   useEffect(() => {

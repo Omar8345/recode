@@ -351,8 +351,8 @@ function getKeywordSet(language: string) {
 function getBuiltins(language: string) {
   return new Set(
     (BUILTIN_IDENTIFIERS[language.toLowerCase()] ?? []).map((item) =>
-      item.toLowerCase()
-    )
+      item.toLowerCase(),
+    ),
   );
 }
 
@@ -360,7 +360,7 @@ function renderHighlightedLine(
   line: string,
   keywordSet: Set<string>,
   builtinSet: Set<string>,
-  language: string
+  language: string,
 ) {
   const tokens = line.match(TOKEN_REGEX) ?? [line];
   const languageLower = language.toLowerCase();
@@ -614,7 +614,7 @@ export function SnippetCard({ snippet, onDelete, onEdit }: SnippetCardProps) {
                       line,
                       keywordSet,
                       builtinSet,
-                      snippet.language
+                      snippet.language,
                     )}
                   </code>
                 </div>

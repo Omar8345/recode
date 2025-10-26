@@ -75,11 +75,11 @@ export function AddSnippetModal({
         .split(",")
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0),
-    [tags]
+    [tags],
   );
   const lineCount = useMemo(
     () => (code.trim().length > 0 ? code.trim().split(/\r?\n/).length : 0),
-    [code]
+    [code],
   );
   const { toast } = useToast();
 

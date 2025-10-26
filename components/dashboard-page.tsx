@@ -63,7 +63,7 @@ export function DashboardPage({ user }: DashboardPageProps) {
       setLoading(true);
       const response = await appwriteDB.listSnippets();
       const items = normalizeSnippetList(
-        response.rows as Array<Models.Row & Record<string, unknown>>
+        response.rows as Array<Models.Row & Record<string, unknown>>,
       );
       setSnippets(items);
     } catch (error) {
@@ -100,7 +100,7 @@ export function DashboardPage({ user }: DashboardPageProps) {
 
   const allTags = useMemo(() => {
     return Array.from(
-      new Set(snippets.flatMap((snippet) => snippet.tags))
+      new Set(snippets.flatMap((snippet) => snippet.tags)),
     ).sort((a, b) => a.localeCompare(b));
   }, [snippets]);
 
@@ -109,7 +109,7 @@ export function DashboardPage({ user }: DashboardPageProps) {
       return snippets;
     }
     return snippets.filter((snippet) =>
-      selectedTags.some((tag) => snippet.tags.includes(tag))
+      selectedTags.some((tag) => snippet.tags.includes(tag)),
     );
   }, [snippets, selectedTags]);
 
@@ -175,14 +175,14 @@ export function DashboardPage({ user }: DashboardPageProps) {
 
   const handleUpdateSnippet = async (
     id: string,
-    payload: Omit<Snippet, "id" | "createdAt">
+    payload: Omit<Snippet, "id" | "createdAt">,
   ) => {
     try {
       setIsEditing(true);
       const response = await appwriteDB.updateSnippet(id, payload);
       const updatedSnippet = normalizeSnippet(response as Models.Row);
       setSnippets((prev) =>
-        prev.map((snippet) => (snippet.id === id ? updatedSnippet : snippet))
+        prev.map((snippet) => (snippet.id === id ? updatedSnippet : snippet)),
       );
       setIsEditModalOpen(false);
       setEditingSnippet(null);
@@ -216,14 +216,14 @@ export function DashboardPage({ user }: DashboardPageProps) {
         "ring-2",
         "ring-primary",
         "ring-offset-2",
-        "ring-offset-background"
+        "ring-offset-background",
       );
       setTimeout(() => {
         element.classList.remove(
           "ring-2",
           "ring-primary",
           "ring-offset-2",
-          "ring-offset-background"
+          "ring-offset-background",
         );
       }, 1200);
     });
@@ -231,7 +231,7 @@ export function DashboardPage({ user }: DashboardPageProps) {
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag]
+      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag],
     );
   };
 
@@ -298,7 +298,7 @@ export function DashboardPage({ user }: DashboardPageProps) {
           const tags = Array.isArray(item.tags)
             ? item.tags
                 .map((tag: unknown) =>
-                  typeof tag === "string" ? tag.trim() : String(tag)
+                  typeof tag === "string" ? tag.trim() : String(tag),
                 )
                 .filter((tag: string) => tag.length > 0)
             : [];
@@ -313,13 +313,13 @@ export function DashboardPage({ user }: DashboardPageProps) {
         })
         .filter(
           (
-            item
+            item,
           ): item is {
             title: string;
             code: string;
             language: string;
             tags: string[];
-          } => Boolean(item)
+          } => Boolean(item),
         );
 
       if (normalized.length === 0) {
@@ -367,7 +367,7 @@ export function DashboardPage({ user }: DashboardPageProps) {
     try {
       setIsClearing(true);
       await Promise.all(
-        snippets.map((snippet) => appwriteDB.deleteSnippet(snippet.id))
+        snippets.map((snippet) => appwriteDB.deleteSnippet(snippet.id)),
       );
       setSnippets([]);
       toast({
