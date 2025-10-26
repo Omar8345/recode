@@ -14,6 +14,7 @@ import { Navbar } from "@/components/navbar";
 import { Sidebar } from "@/components/sidebar";
 import { SnippetCard } from "@/components/snippet-card";
 import { AddSnippetModal } from "@/components/add-snippet-modal";
+import { EditSnippetModal } from "@/components/edit-snippet-modal";
 import { SnippetSearchDialog } from "@/components/snippet-search-dialog";
 import { Button } from "@/components/ui/button";
 import { Plus, Download, Upload, Trash2 } from "lucide-react";
@@ -45,9 +46,12 @@ export function DashboardPage({ user }: DashboardPageProps) {
   const [snippets, setSnippets] = useState<Snippet[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingSnippet, setEditingSnippet] = useState<Snippet | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
@@ -57,7 +61,7 @@ export function DashboardPage({ user }: DashboardPageProps) {
   const fetchSnippets = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await appwriteDB.listSnippets(user.$id);
+      const response = await appwriteDB.listSnippets();
       const items = normalizeSnippetList(
         response.rows as Array<Models.Row & Record<string, unknown>>
       );
@@ -164,6 +168,40 @@ export function DashboardPage({ user }: DashboardPageProps) {
     }
   };
 
+  const handleEditSnippet = (snippet: Snippet) => {
+    setEditingSnippet(snippet);
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateSnippet = async (id: string, payload: Omit<Snippet, "id" | "createdAt">) => {
+    try {
+      setIsEditing(true);
+      const response = await appwriteDB.updateSnippet(id, payload);
+      const updatedSnippet = normalizeSnippet(response as Models.Row);
+      setSnippets((prev) => prev.map((snippet) => 
+        snippet.id === id ? updatedSnippet : snippet
+      ));
+      setIsEditModalOpen(false);
+      setEditingSnippet(null);
+      toast({
+        title: "Snippet updated",
+        description: "Your code snippet has been updated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Could not update snippet",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Something went wrong while updating your snippet.",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsEditing(false);
+    }
+  };
+
   const handleSelectFromSearch = (snippetId: string) => {
     setIsSearchOpen(false);
     requestAnimationFrame(() => {
@@ -257,10 +295,10 @@ export function DashboardPage({ user }: DashboardPageProps) {
               : "";
           const tags = Array.isArray(item.tags)
             ? item.tags
-                .map((tag) =>
+                .map((tag: unknown) =>
                   typeof tag === "string" ? tag.trim() : String(tag)
                 )
-                .filter((tag) => tag.length > 0)
+                .filter((tag: string) => tag.length > 0)
             : [];
 
           if (!title || !code) return null;
@@ -483,6 +521,7 @@ export function DashboardPage({ user }: DashboardPageProps) {
                       <SnippetCard
                         snippet={snippet}
                         onDelete={handleDeleteSnippet}
+                        onEdit={handleEditSnippet}
                       />
                     </motion.div>
                   ))}
@@ -514,6 +553,14 @@ export function DashboardPage({ user }: DashboardPageProps) {
         onOpenChange={setIsModalOpen}
         onAdd={handleAddSnippet}
         isSubmitting={isSaving}
+      />
+
+      <EditSnippetModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        onEdit={handleUpdateSnippet}
+        snippet={editingSnippet}
+        isSubmitting={isEditing}
       />
 
       <SnippetSearchDialog

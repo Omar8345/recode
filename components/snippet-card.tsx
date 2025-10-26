@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Copy, Check, Trash2, Calendar, AlertTriangle } from "lucide-react";
+import { Copy, Check, Trash2, Calendar, AlertTriangle, Edit3 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -479,9 +479,10 @@ function renderHighlightedLine(
 interface SnippetCardProps {
   snippet: Snippet;
   onDelete: (id: string) => Promise<void>;
+  onEdit: (snippet: Snippet) => void;
 }
 
-export function SnippetCard({ snippet, onDelete }: SnippetCardProps) {
+export function SnippetCard({ snippet, onDelete, onEdit }: SnippetCardProps) {
   const [copied, setCopied] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -650,6 +651,15 @@ export function SnippetCard({ snippet, onDelete }: SnippetCardProps) {
             )}
           </motion.span>
           {copied ? "Copied" : "Copy"}
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          className="gap-2 rounded-full border border-border/70 bg-background px-3 text-xs transition-colors hover:border-blue-500/50 hover:bg-blue-500/10 hover:text-blue-600 dark:bg-card/80"
+          onClick={() => onEdit(snippet)}
+        >
+          <Edit3 className="h-4 w-4" />
+          Edit
         </Button>
         <Button
           size="sm"
