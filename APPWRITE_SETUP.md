@@ -1,11 +1,10 @@
-# Appwrite GitHub OAuth Integration Setup Guide
+# recode's Appwrite Integration Setup Guide
 
-This guide will walk you through setting up GitHub OAuth authentication with Appwrite for recode.
+This guide will walk you through setting up authentication with Appwrite for recode.
 
 ## Prerequisites
 
 - An Appwrite account (sign up at https://cloud.appwrite.io)
-- A GitHub account
 - Node.js and npm installed
 
 ## Step 1: Create an Appwrite Project
@@ -15,35 +14,11 @@ This guide will walk you through setting up GitHub OAuth authentication with App
 3. Name your project (e.g., "recode")
 4. Copy the **Project ID** - you'll need this later
 
-## Step 2: Configure GitHub OAuth
-
-### 2.1: Create a GitHub OAuth App
-
-1. Go to your [GitHub Developer Settings](https://github.com/settings/developers)
-2. Click "OAuth Apps" → "New OAuth App"
-3. Fill in the details:
-   - **Application name**: recode (or your preferred name)
-   - **Homepage URL**:
-     - Development: `http://localhost:3000`
-     - Production: `https://yourdomain.com`
-   - **Authorization callback URL**:
-     - Get this from Appwrite (next step)
-4. Click "Register application"
-5. Copy the **Client ID**
-6. Click "Generate a new client secret" and copy the **Client Secret**
-
-### 2.2: Configure OAuth in Appwrite
+## Step 2: Configure Email/Password authentication
 
 1. In your Appwrite Console, go to **Auth** → **Settings**
-2. Scroll down to **OAuth2 Providers**
-3. Find **GitHub** and click on it
-4. Toggle "Enable" to ON
-5. Enter your GitHub **Client ID** and **Client Secret**
-6. Copy the **Redirect URI** provided by Appwrite
-7. Go back to your GitHub OAuth App and update the **Authorization callback URL** with the Appwrite redirect URI
-8. In Appwrite, add your success and failure redirect URLs:
-   - Success: `http://localhost:3000/dashboard` (or your production dashboard URL)
-   - Failure: `http://localhost:3000/` (or your production home URL)
+2. Go to **Auth methods**
+3. Find **Email/Password** and enable it
 
 ## Step 3: Create Database and Table
 
@@ -65,20 +40,18 @@ This guide will walk you through setting up GitHub OAuth authentication with App
 
 Add the following attributes:
 
-| Attribute | Type     | Size  | Required | Array |
-| --------- | -------- | ----- | -------- | ----- |
-| title     | String   | 255   | Yes      | No    |
-| code      | String   | 10000 | Yes      | No    |
-| language  | String   | 50    | Yes      | No    |
-| tags      | String   | 50    | Yes      | Yes   |
-| userId    | String   | 255   | Yes      | No    |
-| createdAt | DateTime | -     | Yes      | No    |
+| Attribute | Type   | Size  | Required | Array |
+| --------- | ------ | ----- | -------- | ----- |
+| title     | String | 255   | Yes      | No    |
+| code      | String | 10000 | Yes      | No    |
+| language  | String | 50    | Yes      | No    |
+| tags      | String | 50    | Yes      | Yes   |
 
 ### 3.4: Set Permissions
 
 1. Go to the **Settings** tab of your table
 2. Under **Permissions**, add:
-   - **Create**: Role: Any (authenticated users)
+   - **Create**: Role: Users (authenticated users)
 
 ### 3.5: Enable Row Security
 
@@ -105,51 +78,33 @@ Add the following attributes:
 
 1. Start your development server:
 
-   ```bash
-   npm run dev
-   ```
+```bash
+npm run dev
+```
 
-2. Open http://localhost:3000
-3. Click "Sign in with GitHub"
-4. You should be redirected to GitHub to authorize the app
-5. After authorization, you should be redirected back to your dashboard
+2. Open `http://localhost:3000` and use the Sign up / Sign in form with an email and password.
+3. If verification is enabled, confirm the verification email and ensure the app accepts the verified user.
+4. Test the password reset flow (Forgot password) to ensure recovery links open the app's reset page.
 
 ## Troubleshooting
 
-### "Invalid OAuth credentials"
+### Common issues
 
-- Double-check your GitHub Client ID and Secret in Appwrite
-- Make sure the redirect URI in GitHub matches exactly with Appwrite's redirect URI
-
-### "Redirect URI mismatch"
-
-- Verify the callback URL in your GitHub OAuth App
-- Make sure you've added both development and production URLs
-
-### "User unauthorized"
-
-- Check table permissions in Appwrite
-- Make sure authenticated users have proper CRUD permissions
-
-### "Environment variables not found"
-
-- Make sure `.env.local` exists and has all required variables
-- Restart your development server after adding environment variables
+- User unauthorized: check database/table permissions and row-level security settings.
+- Environment variables missing: ensure `.env.local` is populated and restart the dev server.
 
 ## Production Deployment
 
 When deploying to production:
 
-1. Add your production domain to GitHub OAuth App URLs
-2. Update Appwrite OAuth success/failure URLs with production URLs
-3. Set environment variables in your hosting platform (Vercel, Netlify, etc.)
-4. Test the complete OAuth flow in production
+1. Add your production domain in the Appwrite Console (Platforms) so redirect URLs work.
+2. Set the production environment variables in your hosting platform (preferably Appwrite Sites).
+3. Test sign-up, verification, and password recovery flows against the production domain.
 
 ## Additional Resources
 
 - [Appwrite Documentation](https://appwrite.io/docs)
 - [Appwrite Auth Guide](https://appwrite.io/docs/products/auth)
-- [GitHub OAuth Documentation](https://docs.github.com/en/apps/oauth-apps)
 
 ## Support
 
@@ -158,4 +113,3 @@ If you encounter issues:
 1. Check the browser console for errors
 2. Check Appwrite logs in the Console
 3. Verify all IDs and secrets are correct
-4. Make sure your GitHub OAuth app is active
