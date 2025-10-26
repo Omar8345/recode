@@ -16,6 +16,15 @@
   </a>
 </p>
 
+<p align="center">
+  <a href="https://github.com/Omar8345/recode?sponsor" target="_blank" rel="noopener noreferrer">
+    <img src="https://img.shields.io/github/sponsors/Omar8345?label=Sponsor%20Recode&style=for-the-badge" alt="Sponsor recode"/>
+  </a>
+  <a href="https://recode.appwrite.network" target="_blank" rel="noopener noreferrer">
+    <img src="https://hits.sh/github.com/Omar8345/recode.svg?style=for-the-badge&label=visitors&color=007ec6)](https://hits.sh/github.com/Omar8345/recode/" alt="Recode Visits"/>
+  </a>
+</p>
+
 ---
 
 ## 🚀 Features
