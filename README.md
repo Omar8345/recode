@@ -43,6 +43,30 @@ Need to connect your own Appwrite project? Follow the [Appwrite setup guide](APP
 
 ---
 
+## 📤 Import / Export JSON format
+
+The dashboard lets you export all snippets to a `.json` file and bulk import from the same format. Each snippet in the JSON array uses this shape:
+
+```json
+[
+  {
+    "title": "Readable snippet title",
+    "code": "// raw code as a single string",
+    "language": "typescript",
+    "tags": ["ui", "hooks"]
+  }
+]
+```
+
+- `title` (string) – required.
+- `code` (string) – required.
+- `language` (string) – optional; when omitted we auto-detect the language during import.
+- `tags` (string array) – optional; defaults to an empty list when missing.
+
+Any invalid entries are skipped; you’ll get a toast with the number of imported snippets once processing completes.
+
+---
+
 ## 📦 Tech Stack
 
 - **Next.js 15**
