@@ -2,7 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Copy, Check, Trash2, Calendar, AlertTriangle, Edit3 } from "lucide-react";
+import {
+  Copy,
+  Check,
+  Trash2,
+  Calendar,
+  AlertTriangle,
+  Edit3,
+} from "lucide-react";
 import {
   Card,
   CardContent,

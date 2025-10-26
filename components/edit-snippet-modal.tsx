@@ -25,11 +25,15 @@ import {
 import { Edit3, Sparkles } from "lucide-react";
 import { detectLanguage } from "@/lib/syntax-highlighter";
 import type { Snippet } from "@/lib/snippets";
+import { toast } from "./ui/use-toast";
 
 interface EditSnippetModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEdit: (id: string, snippet: Omit<Snippet, "id" | "createdAt">) => Promise<void> | void;
+  onEdit: (
+    id: string,
+    snippet: Omit<Snippet, "id" | "createdAt">
+  ) => Promise<void> | void;
   snippet: Snippet | null;
   isSubmitting?: boolean;
 }
@@ -71,14 +75,13 @@ export function EditSnippetModal({
   const [autoDetected, setAutoDetected] = useState(false);
   const [languageTouched, setLanguageTouched] = useState(false);
 
-  // Pre-populate form when snippet changes
   useEffect(() => {
     if (snippet) {
       setTitle(snippet.title);
       setCode(snippet.code);
       setLanguage(snippet.language);
       setTags(snippet.tags.join(", "));
-      setLanguageTouched(true); // Don't auto-detect when editing
+      setLanguageTouched(true);
       setAutoDetected(false);
     }
   }, [snippet]);
@@ -89,12 +92,12 @@ export function EditSnippetModal({
         .split(",")
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0),
-    [tags],
+    [tags]
   );
 
   const lineCount = useMemo(
     () => (code.trim().length > 0 ? code.trim().split(/\r?\n/).length : 0),
-    [code],
+    [code]
   );
 
   useEffect(() => {
@@ -137,7 +140,15 @@ export function EditSnippetModal({
 
       onOpenChange(false);
     } catch (error) {
-      // Edit failed. Swallow or surface via onEdit's rejection for caller handling.
+        toast({
+            title: "Update failed",
+            description:
+                error instanceof Error
+                    ? error.message
+                    : "We could not update your snippet. Please try again.",
+            variant: "destructive",
+        });
+        
     }
   };
 
@@ -310,11 +321,6 @@ export function EditSnippetModal({
                 required
                 disabled={isSubmitting}
               />
-              <p className="text-xs text-muted-foreground">
-                Language detection kicks in automatically once you paste real
-                code. You can always choose a different language from the list
-                above.
-              </p>
             </div>
           </div>
 

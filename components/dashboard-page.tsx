@@ -173,14 +173,17 @@ export function DashboardPage({ user }: DashboardPageProps) {
     setIsEditModalOpen(true);
   };
 
-  const handleUpdateSnippet = async (id: string, payload: Omit<Snippet, "id" | "createdAt">) => {
+  const handleUpdateSnippet = async (
+    id: string,
+    payload: Omit<Snippet, "id" | "createdAt">
+  ) => {
     try {
       setIsEditing(true);
       const response = await appwriteDB.updateSnippet(id, payload);
       const updatedSnippet = normalizeSnippet(response as Models.Row);
-      setSnippets((prev) => prev.map((snippet) => 
-        snippet.id === id ? updatedSnippet : snippet
-      ));
+      setSnippets((prev) =>
+        prev.map((snippet) => (snippet.id === id ? updatedSnippet : snippet))
+      );
       setIsEditModalOpen(false);
       setEditingSnippet(null);
       toast({
