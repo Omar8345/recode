@@ -1,7 +1,14 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from "react";
 import type { Models } from "appwrite";
 import { Navbar } from "@/components/navbar";
 import { Sidebar } from "@/components/sidebar";
@@ -9,7 +16,7 @@ import { SnippetCard } from "@/components/snippet-card";
 import { AddSnippetModal } from "@/components/add-snippet-modal";
 import { SnippetSearchDialog } from "@/components/snippet-search-dialog";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Download, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { appwriteDB } from "@/lib/appwrite";
 import {
@@ -18,6 +25,7 @@ import {
   type Snippet,
   type SnippetPayload,
 } from "@/lib/snippets";
+import { detectLanguage } from "@/lib/syntax-highlighter";
 
 interface DashboardPageProps {
   user: Models.User<Models.Preferences>;
@@ -30,12 +38,14 @@ export function DashboardPage({ user }: DashboardPageProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const fetchSnippets = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await appwriteDB.listSnippets();
+      const response = await appwriteDB.listSnippets(user.$id);
       const items = normalizeSnippetList(
         response.rows as Array<Models.Row & Record<string, unknown>>,
       );
@@ -172,6 +182,125 @@ export function DashboardPage({ user }: DashboardPageProps) {
     );
   };
 
+  const handleExportSnippets = () => {
+    try {
+      const payload = snippets.map((snippet) => ({
+        title: snippet.title,
+        code: snippet.code,
+        language: snippet.language,
+        tags: snippet.tags,
+      }));
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      anchor.download = `recode-snippets-${timestamp}.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Snippets exported",
+        description: "Your snippets were downloaded as JSON.",
+      });
+    } catch (error) {
+      console.error("Export failed", error);
+      toast({
+        title: "Export failed",
+        description: "We couldn't create the export file.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsImporting(true);
+      const raw = await file.text();
+      const parsed = JSON.parse(raw);
+
+      if (!Array.isArray(parsed)) {
+        throw new Error("JSON must contain an array of snippets.");
+      }
+
+      const normalized = parsed
+        .map((item) => {
+          if (typeof item !== "object" || item === null) return null;
+
+          const title = typeof item.title === "string" ? item.title.trim() : "";
+          const code = typeof item.code === "string" ? item.code : "";
+          let language =
+            typeof item.language === "string" && item.language.trim()
+              ? item.language.trim()
+              : "";
+          const tags = Array.isArray(item.tags)
+            ? item.tags
+                .map((tag) =>
+                  typeof tag === "string" ? tag.trim() : String(tag),
+                )
+                .filter((tag) => tag.length > 0)
+            : [];
+
+          if (!title || !code) return null;
+
+          if (!language) {
+            language = detectLanguage(code);
+          }
+
+          return { title, code, language, tags };
+        })
+        .filter((item): item is {
+          title: string;
+          code: string;
+          language: string;
+          tags: string[];
+        } => Boolean(item));
+
+      if (normalized.length === 0) {
+        throw new Error("No valid snippets were found in the file.");
+      }
+
+      for (const snippet of normalized) {
+        await appwriteDB.createSnippet({
+          ...snippet,
+          userId: user.$id,
+        });
+      }
+
+      toast({
+        title: "Import complete",
+        description: `Imported ${normalized.length} snippet${
+          normalized.length === 1 ? "" : "s"
+        } successfully.`,
+      });
+
+      await fetchSnippets();
+    } catch (error) {
+      console.error("Import failed", error);
+      toast({
+        title: "Import failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "We could not import that file.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsImporting(false);
+      event.target.value = "";
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -219,6 +348,27 @@ export function DashboardPage({ user }: DashboardPageProps) {
                     filteredSnippets.length === 1 ? "" : "s"
                   } found`}
                 </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background px-3 text-xs font-semibold uppercase tracking-wide transition hover:border-primary/40 hover:text-primary dark:bg-card/80"
+                  onClick={handleExportSnippets}
+                  disabled={snippets.length === 0}
+                >
+                  <Download className="h-4 w-4" /> Export
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background px-3 text-xs font-semibold uppercase tracking-wide transition hover:border-primary/40 hover:text-primary dark:bg-card/80"
+                  onClick={handleImportClick}
+                  disabled={isImporting}
+                >
+                  <Upload className="h-4 w-4" />
+                  {isImporting ? "Importing…" : "Import"}
+                </Button>
               </div>
             </div>
 
@@ -310,6 +460,13 @@ export function DashboardPage({ user }: DashboardPageProps) {
         snippets={snippets}
         onSelectSnippet={handleSelectFromSearch}
         filtersActive={selectedTags.length > 0}
+      />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/json"
+        className="hidden"
+        onChange={handleImportFile}
       />
     </div>
   );
