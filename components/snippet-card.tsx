@@ -344,8 +344,8 @@ function getKeywordSet(language: string) {
 function getBuiltins(language: string) {
   return new Set(
     (BUILTIN_IDENTIFIERS[language.toLowerCase()] ?? []).map((item) =>
-      item.toLowerCase(),
-    ),
+      item.toLowerCase()
+    )
   );
 }
 
@@ -353,7 +353,7 @@ function renderHighlightedLine(
   line: string,
   keywordSet: Set<string>,
   builtinSet: Set<string>,
-  language: string,
+  language: string
 ) {
   const tokens = line.match(TOKEN_REGEX) ?? [line];
   const languageLower = language.toLowerCase();
@@ -606,7 +606,7 @@ export function SnippetCard({ snippet, onDelete }: SnippetCardProps) {
                       line,
                       keywordSet,
                       builtinSet,
-                      snippet.language,
+                      snippet.language
                     )}
                   </code>
                 </div>
@@ -654,9 +654,7 @@ export function SnippetCard({ snippet, onDelete }: SnippetCardProps) {
         <Button
           size="sm"
           variant="outline"
-          className="gap-2 rounded-full border border-destructive/50 text-destructive 
-          hover:border-destructive hover:bg-destructive/10 hover:text-destructive
-          dark:bg-card/80 dark:hover:bg-destructive/20"
+          className="gap-2 rounded-full border border-destructive/60 bg-background px-3 text-xs font-medium text-destructive transition-colors hover:border-destructive hover:bg-destructive/15 hover:text-destructive dark:text-destructive dark:bg-card/80 dark:hover:bg-destructive/20"
           onClick={() => setShowDeleteDialog(true)}
         >
           <Trash2 className="h-4 w-4" />

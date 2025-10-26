@@ -16,7 +16,17 @@ import { SnippetCard } from "@/components/snippet-card";
 import { AddSnippetModal } from "@/components/add-snippet-modal";
 import { SnippetSearchDialog } from "@/components/snippet-search-dialog";
 import { Button } from "@/components/ui/button";
-import { Plus, Download, Upload } from "lucide-react";
+import { Plus, Download, Upload, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { appwriteDB } from "@/lib/appwrite";
 import {
@@ -39,6 +49,8 @@ export function DashboardPage({ user }: DashboardPageProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+  const [showClearDialog, setShowClearDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -47,7 +59,7 @@ export function DashboardPage({ user }: DashboardPageProps) {
       setLoading(true);
       const response = await appwriteDB.listSnippets(user.$id);
       const items = normalizeSnippetList(
-        response.rows as Array<Models.Row & Record<string, unknown>>,
+        response.rows as Array<Models.Row & Record<string, unknown>>
       );
       setSnippets(items);
     } catch (error) {
@@ -84,7 +96,7 @@ export function DashboardPage({ user }: DashboardPageProps) {
 
   const allTags = useMemo(() => {
     return Array.from(
-      new Set(snippets.flatMap((snippet) => snippet.tags)),
+      new Set(snippets.flatMap((snippet) => snippet.tags))
     ).sort((a, b) => a.localeCompare(b));
   }, [snippets]);
 
@@ -93,7 +105,7 @@ export function DashboardPage({ user }: DashboardPageProps) {
       return snippets;
     }
     return snippets.filter((snippet) =>
-      selectedTags.some((tag) => snippet.tags.includes(tag)),
+      selectedTags.some((tag) => snippet.tags.includes(tag))
     );
   }, [snippets, selectedTags]);
 
@@ -163,14 +175,14 @@ export function DashboardPage({ user }: DashboardPageProps) {
         "ring-2",
         "ring-primary",
         "ring-offset-2",
-        "ring-offset-background",
+        "ring-offset-background"
       );
       setTimeout(() => {
         element.classList.remove(
           "ring-2",
           "ring-primary",
           "ring-offset-2",
-          "ring-offset-background",
+          "ring-offset-background"
         );
       }, 1200);
     });
@@ -178,7 +190,7 @@ export function DashboardPage({ user }: DashboardPageProps) {
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag],
+      prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag]
     );
   };
 
@@ -246,7 +258,7 @@ export function DashboardPage({ user }: DashboardPageProps) {
           const tags = Array.isArray(item.tags)
             ? item.tags
                 .map((tag) =>
-                  typeof tag === "string" ? tag.trim() : String(tag),
+                  typeof tag === "string" ? tag.trim() : String(tag)
                 )
                 .filter((tag) => tag.length > 0)
             : [];
@@ -259,12 +271,16 @@ export function DashboardPage({ user }: DashboardPageProps) {
 
           return { title, code, language, tags };
         })
-        .filter((item): item is {
-          title: string;
-          code: string;
-          language: string;
-          tags: string[];
-        } => Boolean(item));
+        .filter(
+          (
+            item
+          ): item is {
+            title: string;
+            code: string;
+            language: string;
+            tags: string[];
+          } => Boolean(item)
+        );
 
       if (normalized.length === 0) {
         throw new Error("No valid snippets were found in the file.");
@@ -298,6 +314,42 @@ export function DashboardPage({ user }: DashboardPageProps) {
     } finally {
       setIsImporting(false);
       event.target.value = "";
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (snippets.length === 0 || isClearing) return;
+    setShowClearDialog(true);
+  };
+
+  const confirmDeleteAll = async () => {
+    if (snippets.length === 0 || isClearing) return;
+
+    try {
+      setIsClearing(true);
+      await Promise.all(
+        snippets.map((snippet) => appwriteDB.deleteSnippet(snippet.id))
+      );
+      setSnippets([]);
+      toast({
+        title: "Snippets cleared",
+        description: "All snippets have been permanently removed.",
+        variant: "destructive",
+      });
+    } catch (error) {
+      console.error("Failed to delete all snippets", error);
+      toast({
+        title: "Delete failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "We couldn't remove your snippets.",
+        variant: "destructive",
+      });
+      await fetchSnippets();
+    } finally {
+      setIsClearing(false);
+      setShowClearDialog(false);
     }
   };
 
@@ -353,7 +405,7 @@ export function DashboardPage({ user }: DashboardPageProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background px-3 text-xs font-semibold uppercase tracking-wide transition hover:border-primary/40 hover:text-primary dark:bg-card/80"
+                  className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground transition hover:border-primary/60 hover:bg-primary/10 hover:text-primary dark:text-foreground dark:bg-card/80 dark:hover:border-primary/60 dark:hover:bg-primary/10 dark:hover:text-primary"
                   onClick={handleExportSnippets}
                   disabled={snippets.length === 0}
                 >
@@ -362,12 +414,22 @@ export function DashboardPage({ user }: DashboardPageProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background px-3 text-xs font-semibold uppercase tracking-wide transition hover:border-primary/40 hover:text-primary dark:bg-card/80"
+                  className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground transition hover:border-primary/60 hover:bg-primary/10 hover:text-primary dark:text-foreground dark:bg-card/80 dark:hover:border-primary/60 dark:hover:bg-primary/10 dark:hover:text-primary"
                   onClick={handleImportClick}
                   disabled={isImporting}
                 >
                   <Upload className="h-4 w-4" />
                   {isImporting ? "Importing…" : "Import"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="inline-flex items-center gap-2 rounded-full border border-destructive/60 bg-background px-3 text-xs font-semibold uppercase tracking-wide text-destructive transition hover:border-destructive hover:bg-destructive/15 hover:text-destructive dark:text-destructive dark:bg-card/80 dark:hover:bg-destructive/20"
+                  onClick={handleDeleteAll}
+                  disabled={snippets.length === 0 || isClearing}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {isClearing ? "Clearing…" : "Delete All"}
                 </Button>
               </div>
             </div>
@@ -468,6 +530,27 @@ export function DashboardPage({ user }: DashboardPageProps) {
         className="hidden"
         onChange={handleImportFile}
       />
+      <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete all snippets?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action permanently removes all of your snippets. You can
+              export a backup first if you want to keep a copy.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isClearing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isClearing}
+              onClick={confirmDeleteAll}
+            >
+              {isClearing ? "Deleting…" : "Delete Everything"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
