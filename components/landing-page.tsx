@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AppIcon } from "@/components/app-icon";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { AuthModal } from "@/components/AuthModal";
@@ -26,8 +26,13 @@ import { AuthModal } from "@/components/AuthModal";
 export function LandingPage() {
   const [isStarHovered, setIsStarHovered] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { isAuthenticated, loading } = useAuth();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const scrollToFeatures = () => {
     document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
@@ -447,20 +452,23 @@ export function LandingPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-all hover:border-primary/30 dark:hover:border-primary/50 dark:hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/20"
-                onMouseEnter={() => setIsStarHovered(true)}
-                onMouseLeave={() => setIsStarHovered(false)}
+                onMouseEnter={() => mounted && setIsStarHovered(true)}
+                onMouseLeave={() => mounted && setIsStarHovered(false)}
+                suppressHydrationWarning
               >
                 <Github className="h-4 w-4" />
                 <span>Star on GitHub</span>
                 <motion.div
                   animate={{
-                    rotate: isStarHovered ? [0, -15, 15, -15, 0] : 0,
+                    rotate: mounted && isStarHovered ? [0, -15, 15, -15, 0] : 0,
                   }}
                   transition={{ duration: 0.5 }}
                 >
                   <Star
                     className={`h-4 w-4 transition-all duration-300 ${
-                      isStarHovered ? "fill-yellow-400 text-yellow-400" : ""
+                      mounted && isStarHovered
+                        ? "fill-yellow-400 text-yellow-400"
+                        : ""
                     }`}
                   />
                 </motion.div>
@@ -473,6 +481,7 @@ export function LandingPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-medium text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary/20 rounded"
+                  suppressHydrationWarning
                 >
                   Appwrite
                 </a>
