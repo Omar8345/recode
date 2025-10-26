@@ -25,6 +25,7 @@ import {
 import { Code2, Sparkles } from "lucide-react";
 import { detectLanguage } from "@/lib/syntax-highlighter";
 import type { Snippet } from "@/lib/snippets";
+import { useToast } from "@/hooks/use-toast";
 
 interface AddSnippetModalProps {
   open: boolean;
@@ -74,12 +75,13 @@ export function AddSnippetModal({
         .split(",")
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0),
-    [tags],
+    [tags]
   );
   const lineCount = useMemo(
     () => (code.trim().length > 0 ? code.trim().split(/\r?\n/).length : 0),
-    [code],
+    [code]
   );
+  const { toast } = useToast();
 
   useEffect(() => {
     const sample = code.trim();
@@ -127,7 +129,14 @@ export function AddSnippetModal({
       setAutoDetected(false);
       setLanguageTouched(false);
     } catch (error) {
-      // Add snippet failed. Swallow or surface via onAdd's rejection for caller handling.
+      toast({
+        title: "Add snippet failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "We could not add your snippet. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 

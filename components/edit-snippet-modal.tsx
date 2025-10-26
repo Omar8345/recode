@@ -25,7 +25,7 @@ import {
 import { Edit3, Sparkles } from "lucide-react";
 import { detectLanguage } from "@/lib/syntax-highlighter";
 import type { Snippet } from "@/lib/snippets";
-import { toast } from "./ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface EditSnippetModalProps {
   open: boolean;
@@ -74,6 +74,7 @@ export function EditSnippetModal({
   const [tags, setTags] = useState("");
   const [autoDetected, setAutoDetected] = useState(false);
   const [languageTouched, setLanguageTouched] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (snippet) {
@@ -140,15 +141,14 @@ export function EditSnippetModal({
 
       onOpenChange(false);
     } catch (error) {
-        toast({
-            title: "Update failed",
-            description:
-                error instanceof Error
-                    ? error.message
-                    : "We could not update your snippet. Please try again.",
-            variant: "destructive",
-        });
-        
+      toast({
+        title: "Update failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "We could not update your snippet. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
