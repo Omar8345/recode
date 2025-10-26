@@ -260,7 +260,6 @@ export function DashboardPage({ user }: DashboardPageProps) {
         description: "Your snippets were downloaded as JSON.",
       });
     } catch (error) {
-      console.error("Export failed", error);
       toast({
         title: "Export failed",
         description: "We couldn't create the export file.",
@@ -343,7 +342,6 @@ export function DashboardPage({ user }: DashboardPageProps) {
 
       await fetchSnippets();
     } catch (error) {
-      console.error("Import failed", error);
       toast({
         title: "Import failed",
         description:
@@ -378,7 +376,6 @@ export function DashboardPage({ user }: DashboardPageProps) {
         variant: "destructive",
       });
     } catch (error) {
-      console.error("Failed to delete all snippets", error);
       toast({
         title: "Delete failed",
         description:

@@ -494,7 +494,7 @@ export function LandingPage() {
       <AuthModal
         open={authOpen}
         onOpenChange={setAuthOpen}
-        onAuthSuccess={(user) => {
+        onAuthSuccess={() => {
           setAuthOpen(false);
           router.push("/dashboard");
         }}
